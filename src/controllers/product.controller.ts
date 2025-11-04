@@ -6,7 +6,9 @@ import ProductService from "../services/product.service";
 import AttributeProductService from "../services/attribute-product.service";
 import paginationHelper from "../helpers/pagination.helper";
 import { removeKeysObject } from "../utils/lodash.util";
+import { cleanAndGroupProductVariants } from "../helpers/other.helper";
 
+// [GET] /products/
 export const product = async (req: Request, res: Response) => {
   const { limit, page, keyword } = req.query;
 
@@ -47,6 +49,12 @@ export const product = async (req: Request, res: Response) => {
     status: "success",
     metadata: records.map((record) =>
       removeKeysObject(record, [
+        "attributes",
+        "status",
+        "slug",
+        "variants",
+        "category",
+        "content",
         "deleted",
         "deletedAt",
         "search",
@@ -59,7 +67,22 @@ export const product = async (req: Request, res: Response) => {
   });
 };
 
-// [GET] /admin/products/categories
+// [GET] /products/:id
+export const productDetail = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const record = await ProductService.getById(id, {
+    deleted: false,
+    status: "active",
+  });
+
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    data: cleanAndGroupProductVariants(record),
+  });
+};
+
+// [GET] /products/categories
 export const category = async (req: Request, res: Response) => {
   const { limit, page, keyword } = req.query;
   const find: {
@@ -104,6 +127,8 @@ export const category = async (req: Request, res: Response) => {
     status: "success",
     metadata: records.map((record) =>
       removeKeysObject(record, [
+        "status",
+        "slug",
         "deleted",
         "deletedAt",
         "search",
@@ -116,7 +141,66 @@ export const category = async (req: Request, res: Response) => {
   });
 };
 
-// [GET] /admin/products/attributes
+// [GET] /products/categories/:id
+export const categoryDetail = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const record: any = await CategoryProductService.getById(id, {
+    deleted: false,
+    status: "active",
+  });
+
+  if (!record) {
+    return res.status(STATUS_CODES.NOT_FOUND).json({
+      code: STATUS_CODES.NOT_FOUND,
+      status: "error",
+      message: "Danh mục không tồn tại!",
+    });
+  }
+
+  const products: any[] = await ProductService.getAll({
+    find: {
+      category: {
+        $in: id,
+      },
+      deleted: false,
+      status: "active",
+    },
+  });
+
+  record.products = products.map((product) =>
+    removeKeysObject(product, [
+      "attributes",
+      "status",
+      "slug",
+      "variants",
+      "category",
+      "deleted",
+      "deletedAt",
+      "search",
+      "__v",
+      "createdAt",
+      "updatedAt",
+    ])
+  );
+
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    data: removeKeysObject(record, [
+      "slug",
+      "status",
+      "deleted",
+      "deletedAt",
+      "search",
+      "__v",
+      "createdAt",
+      "updatedAt",
+    ]),
+  });
+};
+
+// [GET] /products/attributes
 export const attribute = async (req: Request, res: Response) => {
   const { limit, page, keyword } = req.query;
   const find: {

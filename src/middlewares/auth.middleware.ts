@@ -5,10 +5,10 @@ import { JwtPayload, verify } from "jsonwebtoken";
 // import permissions from "../commons/permission.common";
 // import RoleService from "../services/admin/role.service";
 import { STATUS_CODES } from "../utils/status-codes";
-import { IAccountRequest } from "../models/interfaces/account.interface";
+// import { IAccountRequest } from "../models/interfaces/auth.interface";
 
 export const verifyToken = async (
-  req: IAccountRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {

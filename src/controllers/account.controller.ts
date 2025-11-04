@@ -5,7 +5,7 @@ import { compareSync } from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import { pathAdmin } from "../configs/variable.config";
 // import { logAdminAction } from "../helpers/log.helper";
-import { IAccountRequest } from "../models/interfaces/account.interface";
+// import { IAccountRequest } from "../models/interfaces/auth.interface";
 
 // [GET] /admin/accounts/login
 export const login = async (req: Request, res: Response) => {
@@ -15,14 +15,14 @@ export const login = async (req: Request, res: Response) => {
 };
 
 // [GET] /admin/accounts/logout
-export const logout = async (req: IAccountRequest, res: Response) => {
+export const logout = async (req: Request, res: Response) => {
   res.clearCookie("token");
   res.redirect(`/${pathAdmin}/accounts/login`);
   // logAdminAction(req, { title: "Đăng xuất hệ thống" });
 };
 
 // [POST] /admin/accounts/login
-export const loginPost = async (req: IAccountRequest, res: Response) => {
+export const loginPost = async (req: Request, res: Response) => {
   // const { email, password, rememberPassword } = req.body;
 
   // let token = "";

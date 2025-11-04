@@ -4,11 +4,20 @@ import * as productController from "../../controllers/product.controller";
 const router = Router();
 
 // -------------------------------- ARTICLE ROUTE GET --------------------------------//
-// [GET] /admin/product/
+// [GET] /products
 router.get("/", productController.product);
-// [GET] /admin/product/categories
+
+// [GET] /products/categories
 router.get("/categories", productController.category);
-// [GET] /admin/product/attributes
+
+// [GET] /products/attributes
 router.get("/attributes", productController.attribute);
+
+// [GET] /products/:id
+router.get("/:id", productController.productDetail);
+
+// [GET] /products/categories/:id
+router.get("/categories/:id", productController.categoryDetail);
+
 // ------------------------------ END ARTICLE ROUTE GET ------------------------------//
 export default router;

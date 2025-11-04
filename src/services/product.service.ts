@@ -14,6 +14,18 @@ class ProductService {
   }) {
     return await Product.find(find).sort(sort).limit(limit).skip(skip).lean();
   }
+
+  static async getById(
+    id: string,
+    find: Record<string, any> = {
+      deleted: false,
+    }
+  ) {
+    return await Product.findOne({
+      _id: id,
+      ...find,
+    }).lean();
+  }
 }
 
 export default ProductService;
