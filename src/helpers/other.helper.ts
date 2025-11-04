@@ -101,6 +101,7 @@ const cleanAndGroupProductVariants = (record: any) => {
       status: v.status,
       priceOld: v.priceOld,
       priceNew: v.priceNew,
+      stock: v.stock,
       options: optionMap,
     };
   });
