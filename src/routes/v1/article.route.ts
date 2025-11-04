@@ -5,11 +5,17 @@ const router = Router();
 
 // -------------------------------- ARTICLE ROUTE GET --------------------------------//
 
-// [GET] /admin/article
+// [GET] /article
 router.get("/", articleController.article);
 
-// [GET] /admin/article/category
+// [GET] /article/categories
 router.get("/categories", articleController.category);
+
+// [GET] /article/:id
+router.get("/:id", articleController.articleDetail);
+
+// [GET] /article/categories/:id
+router.get("/categories/:id", articleController.categoryDetail);
 
 // ------------------------------ END ARTICLE ROUTE GET ------------------------------//
 

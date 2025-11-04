@@ -7,12 +7,13 @@ import CategoryBlogService from "../services/category-blog.service";
 import { removeKeysObject } from "../utils/lodash.util";
 import { STATUS_CODES } from "../utils/status-codes";
 
-// [GET] /admin/article
+// [GET] /articles
 export const article = async (req: Request, res: Response) => {
   const { keyword, page, limit } = req.query;
 
-  const find: { deleted: boolean; search?: RegExp } = {
+  const find: { deleted: boolean; status: string; search?: RegExp } = {
     deleted: false,
+    status: "published",
   };
 
   if (keyword) {
@@ -58,7 +59,30 @@ export const article = async (req: Request, res: Response) => {
   });
 };
 
-// [GET] /admin/article/category
+// [GET] /articles/:id
+export const articleDetail = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const record: any = await ArticleService.getById(id, {
+    deleted: false,
+    status: "published",
+  });
+
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    data: removeKeysObject(record, [
+      "deleted",
+      "deletedAt",
+      "search",
+      "__v",
+      "createdAt",
+      "updatedAt",
+    ]),
+  });
+};
+
+// [GET] /articles/categories
 export const category = async (req: Request, res: Response) => {
   const { keyword, page, limit } = req.query;
 
@@ -117,5 +141,51 @@ export const category = async (req: Request, res: Response) => {
       ])
     ),
     pagination,
+  });
+};
+
+// [GET] /articles/categories/:id
+export const categoryDetail = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const record: any = await CategoryBlogService.getById(id, {
+    deleted: false,
+    status: "active",
+  });
+
+  const articles = await ArticleService.getAll({
+    find: {
+      category: { $in: id },
+      deleted: false,
+      status: "published",
+    },
+  });
+
+  record.articles = articles.map((article) =>
+    removeKeysObject(article, [
+      "slug",
+      "category",
+      "status",
+      "deleted",
+      "deletedAt",
+      "search",
+      "__v",
+      "createdAt",
+      "updatedAt",
+    ])
+  );
+
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    data: removeKeysObject(record, [
+      "status",
+      "slug",
+      "deleted",
+      "deletedAt",
+      "search",
+      "__v",
+      "createdAt",
+      "updatedAt",
+    ]),
   });
 };
