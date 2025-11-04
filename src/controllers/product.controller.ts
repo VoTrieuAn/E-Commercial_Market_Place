@@ -5,6 +5,7 @@ import slugify from "slugify";
 import ProductService from "../services/product.service";
 import AttributeProductService from "../services/attribute-product.service";
 import paginationHelper from "../helpers/pagination.helper";
+import { removeKeysObject } from "../utils/lodash.util";
 
 export const product = async (req: Request, res: Response) => {
   const { limit, page, keyword } = req.query;
@@ -34,7 +35,7 @@ export const product = async (req: Request, res: Response) => {
     page: page ? Number(page) : 1,
   });
 
-  const products = await ProductService.getAll({
+  const records = await ProductService.getAll({
     find,
     sort: { position: -1 },
     skip: pagination.skip,
@@ -44,7 +45,16 @@ export const product = async (req: Request, res: Response) => {
   res.status(STATUS_CODES.OK).json({
     code: STATUS_CODES.OK,
     status: "success",
-    metadata: products,
+    metadata: records.map((record) =>
+      removeKeysObject(record, [
+        "deleted",
+        "deletedAt",
+        "search",
+        "__v",
+        "createdAt",
+        "updatedAt",
+      ])
+    ),
     pagination,
   });
 };
@@ -54,9 +64,11 @@ export const category = async (req: Request, res: Response) => {
   const { limit, page, keyword } = req.query;
   const find: {
     search?: RegExp;
+    status: string;
     deleted: boolean;
   } = {
     deleted: false,
+    status: "active",
   };
 
   if (keyword) {
@@ -75,16 +87,11 @@ export const category = async (req: Request, res: Response) => {
     page: page ? Number(page) : 1,
   });
 
-  const { skip } = pagination;
-
-  const [records, countDeleted] = await Promise.all([
-    CategoryProductService.getAll({
-      find,
-      limit: limit ? Number(limit) : 20,
-      skip,
-    }),
-    CategoryProductService.getCountDeleted(),
-  ]);
+  const records = await CategoryProductService.getAll({
+    find,
+    limit: limit ? Number(limit) : 20,
+    skip: pagination.skip,
+  });
 
   for (const record of records) {
     if (!record.parent) continue;
@@ -92,11 +99,20 @@ export const category = async (req: Request, res: Response) => {
     (record as any).parentName = parent ? parent.name : "";
   }
 
-  res.render("admin/pages/product-category", {
-    pageTitle: "Danh mục sản phẩm",
-    categories: records,
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    metadata: records.map((record) =>
+      removeKeysObject(record, [
+        "deleted",
+        "deletedAt",
+        "search",
+        "__v",
+        "createdAt",
+        "updatedAt",
+      ])
+    ),
     pagination,
-    countDeleted,
   });
 };
 
@@ -126,21 +142,25 @@ export const attribute = async (req: Request, res: Response) => {
     page: page ? Number(page) : 1,
   });
 
-  const { skip } = pagination;
+  const records = await AttributeProductService.getAll({
+    find,
+    limit: limit ? Number(limit) : 20,
+    skip: pagination.skip,
+  });
 
-  const [records, countDeleted] = await Promise.all([
-    AttributeProductService.getAll({
-      find,
-      limit: limit ? Number(limit) : 20,
-      skip,
-    }),
-    AttributeProductService.getCountDeleted(),
-  ]);
-
-  res.render("admin/pages/product-attribute", {
-    pageTitle: "Thuộc tính sản phẩm",
-    attributes: records,
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    metadata: records.map((record) =>
+      removeKeysObject(record, [
+        "deleted",
+        "deletedAt",
+        "search",
+        "__v",
+        "createdAt",
+        "updatedAt",
+      ])
+    ),
     pagination,
-    countDeleted,
   });
 };
