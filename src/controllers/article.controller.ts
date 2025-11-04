@@ -4,10 +4,12 @@ import slugify from "slugify";
 import paginationHelper from "../helpers/pagination.helper";
 import ArticleService from "../services/article.service";
 import CategoryBlogService from "../services/category-blog.service";
+import { removeKeysObject } from "../utils/lodash.util";
+import { STATUS_CODES } from "../utils/status-codes";
 
 // [GET] /admin/article
 export const article = async (req: Request, res: Response) => {
-  const { keyword, page } = req.query;
+  const { keyword, page, limit } = req.query;
 
   const find: { deleted: boolean; search?: RegExp } = {
     deleted: false,
@@ -27,36 +29,42 @@ export const article = async (req: Request, res: Response) => {
   // Pagination
   const pagination = await paginationHelper({
     modelName: "Blog",
-    page: page ? Number(page) : 1,
     find,
+    limit: limit ? Number(limit) : 20,
+    page: page ? Number(page) : 1,
   });
 
   // End Pagination
-  const { limit, skip } = pagination;
+  const records = await ArticleService.getAll({
+    find,
+    limit: pagination.limit,
+    skip: pagination.skip,
+  });
 
-  const [records, countDeleted] = await Promise.all([
-    ArticleService.getAll({
-      find,
-      limit,
-      skip,
-    }),
-    ArticleService.getCountDeleted(),
-  ]);
-
-  res.render("admin/pages/article", {
-    pageTitle: "Quản lý bài viết",
-    blogs: records,
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    metadata: records.map((record) =>
+      removeKeysObject(record, [
+        "deleted",
+        "deletedAt",
+        "search",
+        "__v",
+        "createdAt",
+        "updatedAt",
+      ])
+    ),
     pagination,
-    countDeleted,
   });
 };
 
 // [GET] /admin/article/category
 export const category = async (req: Request, res: Response) => {
-  const { keyword, page } = req.query;
+  const { keyword, page, limit } = req.query;
 
-  const find: { deleted: boolean; search?: RegExp } = {
+  const find: { deleted: boolean; status: string; search?: RegExp } = {
     deleted: false,
+    status: "active",
   };
 
   if (keyword) {
@@ -74,20 +82,17 @@ export const category = async (req: Request, res: Response) => {
   const pagination = await paginationHelper({
     modelName: "CategoryBlog",
     page: page ? Number(page) : 1,
+    limit: limit ? Number(limit) : 20,
     find,
   });
 
   // End Pagination
-  const { limit, skip } = pagination;
 
-  const [records, countDeleted] = await Promise.all([
-    CategoryBlogService.getAll({
-      find,
-      limit,
-      skip,
-    }),
-    CategoryBlogService.getCountDeleted(),
-  ]);
+  const records = await CategoryBlogService.getAll({
+    find,
+    limit: pagination.limit,
+    skip: pagination.skip,
+  });
 
   for (const record of records) {
     if (record.parent) {
@@ -98,10 +103,19 @@ export const category = async (req: Request, res: Response) => {
     }
   }
 
-  res.render("admin/pages/article-category", {
-    pageTitle: "Quản lý danh mục bài viết",
-    categories: records,
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    metadata: records.map((record) =>
+      removeKeysObject(record, [
+        "deleted",
+        "deletedAt",
+        "search",
+        "__v",
+        "createdAt",
+        "updatedAt",
+      ])
+    ),
     pagination,
-    countDeleted,
   });
 };

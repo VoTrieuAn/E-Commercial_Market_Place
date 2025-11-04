@@ -9,7 +9,7 @@ const router = Router();
 router.get("/", articleController.article);
 
 // [GET] /admin/article/category
-router.get("/category", articleController.category);
+router.get("/categories", articleController.category);
 
 // ------------------------------ END ARTICLE ROUTE GET ------------------------------//
 
