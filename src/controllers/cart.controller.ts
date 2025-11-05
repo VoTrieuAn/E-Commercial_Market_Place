@@ -2,12 +2,12 @@ import { Request, Response } from "express";
 import CartService from "../services/cart.service";
 import {
   IAuthRequest,
-  ITokenPayLoad,
+  IDecodedTokenPayLoad,
 } from "../models/interfaces/auth.interface";
 import { STATUS_CODES } from "../utils/status-codes";
 
 export const cart = async (req: IAuthRequest, res: Response) => {
-  const { userId } = req.user as ITokenPayLoad;
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
   const result = await CartService.getUserCart(userId);
 
   res.status(STATUS_CODES.OK).json({
@@ -20,7 +20,7 @@ export const cart = async (req: IAuthRequest, res: Response) => {
 
 export const cartPost = async (req: IAuthRequest, res: Response) => {
   // Tạm thời lấy user id từ ngoài truyền vào, sau nay sẽ lấy từ token
-  const { userId } = req.user as ITokenPayLoad;
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
   const product = req.body;
   const result = await CartService.addProductToCart({
     userId,
@@ -35,7 +35,7 @@ export const cartPost = async (req: IAuthRequest, res: Response) => {
 };
 
 export const cartPatch = async (req: IAuthRequest, res: Response) => {
-  const { userId } = req.user as ITokenPayLoad;
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
   const product = req.body;
   const result = await CartService.updateProductInCart({
     userId,
@@ -50,7 +50,7 @@ export const cartPatch = async (req: IAuthRequest, res: Response) => {
 };
 
 export const cartDelete = async (req: IAuthRequest, res: Response) => {
-  const { userId } = req.user as ITokenPayLoad;
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
   const { productId } = req.body;
   const result = await CartService.deleteProductInCart({
     userId,
