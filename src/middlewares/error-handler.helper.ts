@@ -10,7 +10,11 @@ const defaultErrorRequestHandler: ErrorRequestHandler = (
   next: NextFunction
 ) => {
   if (err instanceof ErrorResponse) {
-    res.status(err.getStatus()).json(omit(err, ["status"]));
+    res.status(err.getStatus()).json({
+      code: err.getStatus(),
+      status: "error",
+      ...omit(err, ["status"]),
+    });
     return;
   }
 
