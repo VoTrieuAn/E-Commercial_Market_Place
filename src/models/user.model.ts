@@ -12,6 +12,7 @@ const userSchema = new Schema(
     gender: {
       type: String,
       enum: ["male", "female", "other"],
+      default: "male",
     },
     phone: {
       type: String,
@@ -19,9 +20,14 @@ const userSchema = new Schema(
     },
     // emailVerifyToken: String,
     // forGotPasswordToken: String,
-    avatar: {
+    // avatar: {
+    //   type: String,
+    //   default: "",
+    // },
+    status: {
       type: String,
-      default: "",
+      enum: ["active", "inactive"],
+      default: "active",
     },
     deleted: {
       type: Boolean,

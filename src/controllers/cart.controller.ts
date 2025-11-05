@@ -11,17 +11,23 @@ export const cart = async (req: IAuthRequest, res: Response) => {
   const { userId } = req.decodeUser as IDecodedTokenPayLoad;
   const result = await CartService.getUserCart(userId);
 
+  const total = result?.products.reduce((acc, curr) => {
+    return acc + curr.price * curr.quantity;
+  }, 0);
+
   res.status(STATUS_CODES.OK).json({
     code: STATUS_CODES.OK,
     status: "success",
     message: "Lấy giỏ hàng thành công!",
-    data:
-      removeKeysObject(result as object, [
+    data: {
+      ...removeKeysObject(result as object, [
         "__v",
         "status",
         "createdAt",
         "updatedAt",
-      ]) || {},
+      ]),
+      total: total || 0,
+    },
   });
 };
 
