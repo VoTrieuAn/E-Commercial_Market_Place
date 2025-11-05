@@ -1,8 +1,8 @@
 import User from "../models/user.model";
 
 class UserService {
-  static getUserById() {
-    // Implementation here
+  static async getUserById(userId: string) {
+    return await User.findById(userId).lean();
   }
 
   static async getByEmail(email: string) {

@@ -15,7 +15,13 @@ export const cart = async (req: IAuthRequest, res: Response) => {
     code: STATUS_CODES.OK,
     status: "success",
     message: "Lấy giỏ hàng thành công!",
-    data: result || [],
+    data:
+      removeKeysObject(result as object, [
+        "__v",
+        "status",
+        "createdAt",
+        "updatedAt",
+      ]) || {},
   });
 };
 
@@ -26,16 +32,18 @@ export const cartPost = async (req: IAuthRequest, res: Response) => {
     userId,
     product,
   });
+
   res.status(STATUS_CODES.CREATED).json({
     code: STATUS_CODES.CREATED,
     status: "success",
     message: "Thêm vào giỏ hàng thành công!",
-    data: removeKeysObject(result as object, [
-      "__v",
-      "status",
-      "createdAt",
-      "updatedAt",
-    ]),
+    data:
+      removeKeysObject(result as object, [
+        "__v",
+        "status",
+        "createdAt",
+        "updatedAt",
+      ]) || {},
   });
 };
 

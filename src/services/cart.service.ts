@@ -3,6 +3,7 @@
 import { NotFoundError } from "../core/error.response";
 import Cart from "../models/cart.model";
 import ProductService from "./product.service";
+import UserService from "./user.service";
 // import cartSchema from "../models/schemas/cart.schema";
 // import { findProductById } from "../models/repositories/product.repo";
 // import { NotFoundError } from "../core/error.response";
@@ -32,6 +33,7 @@ class CartService {
         $addToSet: {
           products: product,
         },
+        countProduct: product.quantity || 1,
       },
       options = {
         // Update the document if it exists
@@ -39,7 +41,7 @@ class CartService {
         // Create the document if it doesn't exist
         new: true,
       };
-    return await Cart.findOneAndUpdate(query, updateOrInsert, options);
+    return await Cart.findOneAndUpdate(query, updateOrInsert, options).lean();
   }
 
   private static async updateCartQuantity({
@@ -50,6 +52,11 @@ class CartService {
     product: any;
   }) {
     const { productId, quantity } = product;
+    const cart = await this.getUserCart(userId);
+
+    if (!cart) {
+      throw new NotFoundError("Giỏ hàng không tồn tại");
+    }
 
     const query = {
         userId,
@@ -60,13 +67,14 @@ class CartService {
         $inc: {
           "products.$.quantity": quantity || 1,
         },
+        countProduct: cart.products.length,
       },
       options = {
         new: true,
         upsert: true,
       };
 
-    return await Cart.findOneAndUpdate(query, updateSet, options);
+    return await Cart.findOneAndUpdate(query, updateSet, options).lean();
   }
 
   static async addProductToCart({
