@@ -124,12 +124,20 @@ class CartService {
 
     if (!foundProduct) throw new NotFoundError("Product not found");
 
-    if (quantity === 0) {
+    if (quantity == 0) {
       // Remove product in cart
+      const [_, cart] = await Promise.all([
+        this.deleteProductInCart({
+          userId,
+          productId,
+        }),
+        this.getUserCart(userId),
+      ]);
       await this.deleteProductInCart({
         userId,
         productId,
       });
+      return cart;
     }
     return await this.updateCartQuantity({
       userId,

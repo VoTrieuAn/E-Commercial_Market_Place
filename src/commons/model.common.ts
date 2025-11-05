@@ -2,6 +2,7 @@ import AttributeProduct from "../models/attribute-product.model";
 import Blog from "../models/blog.model";
 import CategoryBlog from "../models/category-blog.model";
 import CategoryProduct from "../models/category-product.model";
+import Order from "../models/order.model";
 import Product from "../models/product.model";
 
 const models: Record<string, any> = {
@@ -10,6 +11,7 @@ const models: Record<string, any> = {
   AttributeProduct,
   CategoryBlog,
   Blog,
+  Order,
 };
 
 export default models;

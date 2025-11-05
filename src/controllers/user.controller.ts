@@ -7,6 +7,7 @@ import UserService from "../services/user.service";
 import { STATUS_CODES } from "../utils/status-codes";
 import { removeKeysObject } from "../utils/lodash.util";
 import moment from "moment";
+import UserAddressService from "../services/user-address.service";
 
 export const getMe = async (req: IAuthRequest, res: Response) => {
   const { userId } = req.decodeUser as IDecodedTokenPayLoad;
@@ -56,5 +57,44 @@ export const updateMe = async (req: IAuthRequest, res: Response) => {
       ...removeKeysObject(result as any, ["__v", "password", "deleted"]),
       dateOfBirth: moment(result?.dateOfBirth).format("DD/MM/YYYY"),
     },
+  });
+};
+
+export const address = async (req: IAuthRequest, res: Response) => {
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
+
+  const result = await UserAddressService.getAddressByUser(userId);
+
+  res.status(STATUS_CODES.CREATED).json({
+    code: STATUS_CODES.CREATED,
+    status: "success",
+    message: "Lấy địa chỉ thành công!",
+    data: removeKeysObject(result as object, ["__v", "updatedAt", "createdAt"]),
+  });
+};
+
+export const addressPost = async (req: IAuthRequest, res: Response) => {
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
+
+  const result = await UserAddressService.upsert(userId, req.body);
+
+  res.status(STATUS_CODES.CREATED).json({
+    code: STATUS_CODES.CREATED,
+    status: "success",
+    message: "Tạo địa chỉ thành công!",
+    data: removeKeysObject(result as object, ["__v", "updatedAt", "createdAt"]),
+  });
+};
+
+export const addressPatch = async (req: IAuthRequest, res: Response) => {
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
+
+  const result = await UserAddressService.upsert(userId, req.body);
+
+  res.status(STATUS_CODES.CREATED).json({
+    code: STATUS_CODES.CREATED,
+    status: "success",
+    message: "Tạo địa chỉ thành công!",
+    data: removeKeysObject(result as object, ["__v", "updatedAt", "createdAt"]),
   });
 };

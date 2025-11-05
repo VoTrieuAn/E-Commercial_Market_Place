@@ -1,7 +1,7 @@
 import { omit, pick } from "lodash";
 
 // Để loại bỏ các key không cần thiết trong object
-const removeKeysObject = (object: object, keys: string[]) => {
+const removeKeysObject = (object: Record<string, any>, keys: string[]) => {
   return omit(object, keys);
 };
 

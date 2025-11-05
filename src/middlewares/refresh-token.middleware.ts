@@ -15,13 +15,13 @@ export const refreshTokenMiddleware = async (
   const refreshTokenBody = req.body.refreshToken;
 
   if (!refreshTokenBody) {
-    throw new AuthFailedError("Yêu cầu không hợp lệ");
+    throw new AuthFailedError("[1] Yêu cầu không hợp lệ");
   }
 
   const keyStore = await KeyTokenService.findByRefreshToken(refreshTokenBody);
 
   if (!keyStore) {
-    throw new AuthFailedError("Yêu cầu không hợp lệ");
+    throw new AuthFailedError("[2] Yêu cầu không hợp lệ");
   }
 
   const { userId, publicKey } = keyStore;
