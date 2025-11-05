@@ -68,6 +68,25 @@ export const cartPatch = async (req: IAuthRequest, res: Response) => {
   });
 };
 
+export const cartClearPatch = async (req: IAuthRequest, res: Response) => {
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
+  const result = await CartService.clearProductInCart({
+    userId,
+  });
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    message: "Dọn dẹp sản phẩm thành công!",
+    data:
+      removeKeysObject(result as object, [
+        "__v",
+        "status",
+        "createdAt",
+        "updatedAt",
+      ]) || {},
+  });
+};
+
 export const cartDelete = async (req: IAuthRequest, res: Response) => {
   const { userId } = req.decodeUser as IDecodedTokenPayLoad;
   const { productId } = req.body;

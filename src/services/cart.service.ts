@@ -162,6 +162,23 @@ class CartService {
     return await Cart.updateOne(query, updateSet);
   }
 
+  static async clearProductInCart({ userId }: { userId: string }) {
+    return await Cart.findOneAndUpdate(
+      {
+        userId,
+        status: "active",
+      },
+      {
+        countProduct: 0,
+        products: [],
+      },
+      {
+        upsert: false,
+        new: true,
+      }
+    ).lean();
+  }
+
   static async getUserCart(userId: string) {
     return await Cart.findOne({
       userId,
