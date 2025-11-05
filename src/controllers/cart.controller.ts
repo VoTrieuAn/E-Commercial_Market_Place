@@ -5,6 +5,7 @@ import {
   IDecodedTokenPayLoad,
 } from "../models/interfaces/auth.interface";
 import { STATUS_CODES } from "../utils/status-codes";
+import { removeKeysObject } from "../utils/lodash.util";
 
 export const cart = async (req: IAuthRequest, res: Response) => {
   const { userId } = req.decodeUser as IDecodedTokenPayLoad;
@@ -14,23 +15,27 @@ export const cart = async (req: IAuthRequest, res: Response) => {
     code: STATUS_CODES.OK,
     status: "success",
     message: "Lấy giỏ hàng thành công!",
-    data: result,
+    data: result || [],
   });
 };
 
 export const cartPost = async (req: IAuthRequest, res: Response) => {
-  // Tạm thời lấy user id từ ngoài truyền vào, sau nay sẽ lấy từ token
   const { userId } = req.decodeUser as IDecodedTokenPayLoad;
   const product = req.body;
   const result = await CartService.addProductToCart({
     userId,
-    product: product,
+    product,
   });
   res.status(STATUS_CODES.CREATED).json({
     code: STATUS_CODES.CREATED,
     status: "success",
     message: "Thêm vào giỏ hàng thành công!",
-    data: result,
+    data: removeKeysObject(result as object, [
+      "__v",
+      "status",
+      "createdAt",
+      "updatedAt",
+    ]),
   });
 };
 
@@ -56,6 +61,18 @@ export const cartDelete = async (req: IAuthRequest, res: Response) => {
     userId,
     productId,
   });
+
+  const { matchedCount } = result;
+
+  if (matchedCount === 0) {
+    res.status(STATUS_CODES.NOT_FOUND).json({
+      code: STATUS_CODES.NOT_FOUND,
+      status: "error",
+      message: "Sản phẩm không tồn tại trong giỏ hàng!",
+    });
+
+    return;
+  }
 
   res.status(STATUS_CODES.OK).json({
     code: STATUS_CODES.OK,

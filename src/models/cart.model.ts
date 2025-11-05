@@ -27,16 +27,14 @@ const cartSchema = new Schema(
       default: 0,
     },
     userId: {
-      type: Number,
+      type: Schema.Types.ObjectId,
       require: true,
+      ref: "users-demo",
     },
   },
   {
     collection: "carts-demo",
-    timestamps: {
-      createdAt: "created_at",
-      updatedAt: "updated_at",
-    },
+    timestamps: true,
   }
 );
 

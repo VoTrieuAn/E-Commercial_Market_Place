@@ -1,19 +1,20 @@
 import { Router } from "express";
 import * as cartController from "../../controllers/cart.controller";
+import { accessTokenMiddleware } from "../../middlewares/access-token.middleware";
 
 const router = Router();
 
 // -------------------------------- ARTICLE ROUTE GET --------------------------------//
 // [GET] /admin/product/
-router.get("/", cartController.cart);
+router.get("/", accessTokenMiddleware, cartController.cart);
 
 // ------------------------------ END ARTICLE ROUTE GET ------------------------------//
 
 // [GET] /admin/product/categories
-router.post("/add", cartController.cartPost);
+router.post("/add", accessTokenMiddleware, cartController.cartPost);
 // [GET] /admin/product/attributes
-router.patch("/update", cartController.cartPatch);
+router.patch("/update", accessTokenMiddleware, cartController.cartPatch);
 
-router.delete("/delete", cartController.cartDelete);
+router.post("/delete", accessTokenMiddleware, cartController.cartDelete);
 
 export default router;

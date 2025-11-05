@@ -52,7 +52,7 @@ class CartService {
     const { productId, quantity } = product;
 
     const query = {
-        user_id: userId,
+        userId,
         "products.productId": productId,
         status: "active",
       },
@@ -140,8 +140,8 @@ class CartService {
     productId: string;
   }) {
     const query = {
-        user_id: userId,
-        state: "active",
+        userId,
+        status: "active",
       },
       updateSet = {
         $pull: {
@@ -156,7 +156,7 @@ class CartService {
 
   static async getUserCart(userId: string) {
     return await Cart.findOne({
-      user_id: userId,
+      userId,
       status: "active",
     }).lean();
   }
