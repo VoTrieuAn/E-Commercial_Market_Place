@@ -1,3 +1,4 @@
+import { hashSync } from "bcryptjs";
 import User from "../models/user.model";
 
 class UserService {
@@ -20,6 +21,20 @@ class UserService {
         status: "active",
       },
       data,
+      {
+        upsert: false,
+        new: true,
+      }
+    ).lean();
+  }
+
+  static async updatePasswordByEmail(email: string, newPassword: string) {
+    return await User.findOneAndUpdate(
+      {
+        email: email,
+        deleted: false,
+      },
+      { password: hashSync(newPassword, 10) },
       {
         upsert: false,
         new: true,

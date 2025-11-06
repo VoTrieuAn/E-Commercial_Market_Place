@@ -12,8 +12,25 @@ import {
 } from "../models/interfaces/auth.interface";
 import { IKeyTokenRequestBody } from "../models/interfaces/key-token.request";
 import { formatStringIdToObjectId } from "../utils/mongoose.util";
+import { removeKeysObject } from "../utils/lodash.util";
+import moment from "moment";
 // import { logAdminAction } from "../helpers/log.helper";
 // import { IAccountRequest } from "../models/interfaces/auth.interface";
+
+export const getUserByEmail = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const result = await AccessService.getAccountByEmail(email);
+
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    message: "Lấy thông tin thành công!",
+    data: {
+      ...removeKeysObject(result, ["__v", "password", "deleted", "createdAt"]),
+      dateOfBirth: moment(result.dateOfBirth).format("DD/MM/YYYY"),
+    },
+  });
+};
 
 // [POST] /access/logout
 export const logout = async (req: IAuthRequest, res: Response) => {
@@ -40,6 +57,35 @@ export const registerPost = async (req: Request, res: Response) => {
     status: "success",
     message: "Đăng ký tài khoản thành công!",
     data: newUser,
+  });
+};
+
+export const forgotPasswordPost = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const result = await AccessService.forgetPassword(email, password);
+
+  if (!result) {
+    res.status(STATUS_CODES.NOT_FOUND).json({
+      code: STATUS_CODES.NOT_FOUND,
+      status: "error",
+      message: "Email không tồn tại!",
+    });
+    return;
+  }
+
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    message: "Cập nhật mật khẩu thành công!",
+    data: {
+      ...removeKeysObject(result as object, [
+        "__v",
+        "password",
+        "deleted",
+        "createdAt",
+      ]),
+      dateOfBirth: moment(result.dateOfBirth).format("DD/MM/YYYY"),
+    },
   });
 };
 

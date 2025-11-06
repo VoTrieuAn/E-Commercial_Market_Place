@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as accessController from "../../controllers/access.controller";
 import { validateDTO } from "../../validates/dto.validate";
 import {
+  forgotPasswordDTO,
   loginDTO,
   refreshTokenDTO,
   registerDTO,
@@ -12,7 +13,7 @@ import { refreshTokenMiddleware } from "../../middlewares/refresh-token.middlewa
 const router = Router();
 
 // -------------------------------- ACCOUNT GET ROUTES ---------------------------//
-
+router.get("/", asyncHandler(accessController.getUserByEmail));
 // -------------------------------- END ACCOUNT GET ROUTES -----------------------//
 
 // -------------------------------- ACCOUNT POST ROUTES --------------------------//
@@ -25,6 +26,13 @@ router.post(
   "/register",
   validateDTO(registerDTO),
   asyncHandler(accessController.registerPost)
+);
+
+// [POST] /access/forgot-password
+router.post(
+  "/forgot-password",
+  validateDTO(forgotPasswordDTO),
+  asyncHandler(accessController.forgotPasswordPost)
 );
 
 // [POST] /access/login

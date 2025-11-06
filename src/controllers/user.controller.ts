@@ -28,7 +28,7 @@ export const getMe = async (req: IAuthRequest, res: Response) => {
     status: "error",
     message: "Lấy thông tin thành công!",
     data: {
-      ...removeKeysObject(result, ["__v", "password", "deleted"]),
+      ...removeKeysObject(result, ["__v", "password", "deleted", "createdAt"]),
       dateOfBirth: moment(result.dateOfBirth).format("DD/MM/YYYY"),
     },
   });

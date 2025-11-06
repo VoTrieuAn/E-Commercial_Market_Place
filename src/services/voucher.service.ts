@@ -208,6 +208,16 @@ class VoucherService {
     const amount =
       type === VoucherType.FIXED_AMOUNT ? value : totalOrder * (value / 100);
 
+    await Voucher.findByIdAndUpdate(foundVoucher._id, {
+      $inc: {
+        usesCount: 1,
+        maxUses: -1,
+      },
+      $push: {
+        usersUsed: { userId },
+      },
+    });
+
     return {
       totalOrder,
       // Số tiền được giảm

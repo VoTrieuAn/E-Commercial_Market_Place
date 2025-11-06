@@ -4,9 +4,15 @@ import UserService from "./user.service";
 
 class UserAddressService {
   static async getAddressByUser(userId: string) {
-    return await UserAddress.findOne({
+    const address = await UserAddress.findOne({
       user: userId,
     }).lean();
+
+    if (!address) {
+      throw new NotFoundError("Địa chỉ người dùng không tồn tại!");
+    }
+
+    return address;
   }
 
   static async upsert(userId: string, data: any) {

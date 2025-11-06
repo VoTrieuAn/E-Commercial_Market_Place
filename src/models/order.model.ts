@@ -48,6 +48,7 @@ const orderSchema = new Schema(
     orderNumber: {
       type: String,
       required: true,
+      unique: true,
     },
     items: {
       type: [orderItemSchema],
@@ -76,6 +77,10 @@ const orderSchema = new Schema(
       default: 0,
     },
     subtotal: {
+      type: Number,
+      default: 0,
+    },
+    discount: {
       type: Number,
       default: 0,
     },

@@ -103,13 +103,13 @@ class AccessService {
     // 1.
     const foundUser = await UserService.getByEmail(email);
     if (!foundUser) {
-      throw new NotFoundError("User không tồn tại!");
+      throw new NotFoundError("Tài khoản hoặc mật khẩu không đúng!");
     }
 
     // 2.
     const match = compareSync(password, foundUser.password as string);
     if (!match) {
-      throw new AuthFailedError("User không được ủy quyền!");
+      throw new AuthFailedError("Tài khoản hoặc mật khẩu không đúng!");
     }
 
     // 3.
@@ -131,6 +131,24 @@ class AccessService {
 
     return { delKey };
   };
+
+  static async getAccountByEmail(email: string) {
+    const foundUser = await UserService.getByEmail(email);
+
+    if (!foundUser) {
+      throw new NotFoundError("Thông tin người dùng không chính xác!");
+    }
+    return foundUser;
+  }
+
+  static async forgetPassword(email: string, newPassword: string) {
+    const foundUser = await UserService.getByEmail(email);
+    if (!foundUser) {
+      throw new NotFoundError("Thông tin người dùng không chính xác!");
+    }
+
+    return await UserService.updatePasswordByEmail(email, newPassword);
+  }
 }
 
 export default AccessService;
