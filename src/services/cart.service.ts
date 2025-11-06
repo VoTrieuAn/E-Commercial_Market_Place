@@ -77,6 +77,33 @@ class CartService {
     return await Cart.findOneAndUpdate(query, updateSet, options).lean();
   }
 
+  private static async pushProductToCart({
+    userId,
+    product = {},
+  }: {
+    userId: string;
+    product: any;
+  }) {
+    return await Cart.findOneAndUpdate(
+      {
+        userId,
+        status: "active",
+      },
+      {
+        $push: {
+          products: product, // Thêm sản phẩm mới vào mảng
+        },
+        $inc: {
+          countProduct: 1, // Tăng tổng số loại sản phẩm
+        },
+      },
+      {
+        new: true,
+        upsert: false, // Giả định giỏ hàng đã được tạo
+      }
+    ).lean();
+  }
+
   static async addProductToCart({
     userId,
     product = {},
@@ -84,23 +111,57 @@ class CartService {
     userId: string;
     product: any;
   }) {
-    // Check cart exists
+    // 1. Kiểm tra giỏ hàng
     const foundCart = await Cart.findOne({
       userId,
-    });
+      status: "active",
+    }).lean(); // Dùng .lean() để lấy object thuần túy
+
+    // 2. Nếu không có giỏ hàng, tạo mới
     if (!foundCart) {
-      // Create new cart
+      // Giả sử createCart sẽ tạo cart và thêm sản phẩm đầu tiên
       return await this.createCart({ userId, product });
     }
 
-    // Nếu có giỏ hàng rồi nhưng chưa có sản phẩm
-    if (!foundCart.products.length) {
-      return await this.createCart({ userId, product });
-    }
+    // 3. Nếu có giỏ hàng, kiểm tra sản phẩm đã tồn tại chưa
+    // (Chuyển đổi sang String để đảm bảo so sánh ObjectId chính xác)
+    const productInCart = foundCart.products.find(
+      (p: any) => p.productId.toString() === product.productId.toString()
+    );
 
-    // Nếu có giỏ hàng và có sản phẩm rồi, thì update quantity
-    return await this.updateCartQuantity({ userId, product });
+    if (productInCart) {
+      // 4a. Nếu sản phẩm ĐÃ CÓ, gọi hàm update số lượng
+      return await this.updateCartQuantity({ userId, product });
+    } else {
+      // 4b. Nếu sản phẩm CHƯA CÓ, gọi hàm push sản phẩm mới
+      return await this.pushProductToCart({ userId, product });
+    }
   }
+  // static async addProductToCart({
+  //   userId,
+  //   product = {},
+  // }: {
+  //   userId: string;
+  //   product: any;
+  // }) {
+  //   // Check cart exists
+  //   const foundCart = await Cart.findOne({
+  //     userId,
+  //   });
+  //   if (!foundCart) {
+  //     // Create new cart
+  //     return await this.createCart({ userId, product });
+  //   }
+
+  //   // Nếu có giỏ hàng rồi nhưng chưa có sản phẩm
+  //   if (!foundCart.products.length) {
+  //     return await this.createCart({ userId, product });
+  //   }
+
+  //   // Nếu có giỏ hàng và có sản phẩm rồi, thì update quantity
+  //   console.log("Chạy tới đây!!");
+  //   return await this.updateCartQuantity({ userId, product });
+  // }
 
   /**
       product: {
