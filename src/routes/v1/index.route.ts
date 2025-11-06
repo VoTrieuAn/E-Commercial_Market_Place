@@ -6,7 +6,8 @@ import accessRouter from "./access.route";
 import userRouter from "./user.route";
 import favoriteRouter from "./favorite.route";
 import orderRouter from "./order.route";
-import feedbackRouter from "./feedback.route";
+// import feedbackRouter from "./feedback.route";
+import voucherRouter from "./voucher.route";
 
 const router = Router();
 
@@ -24,6 +25,8 @@ router.use("/favorites", favoriteRouter);
 
 router.use("/orders", orderRouter);
 
-router.use("/feedbacks", feedbackRouter);
+// router.use("/feedbacks", feedbackRouter);
+
+router.use("/vouchers", voucherRouter);
 
 export default router;
