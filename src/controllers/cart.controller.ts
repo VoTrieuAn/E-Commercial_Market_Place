@@ -89,15 +89,14 @@ export const cartClearPatch = async (req: IAuthRequest, res: Response) => {
 
 export const cartDelete = async (req: IAuthRequest, res: Response) => {
   const { userId } = req.decodeUser as IDecodedTokenPayLoad;
-  const { productId } = req.body;
+  const { productId, variantKey } = req.body;
   const result = await CartService.deleteProductInCart({
     userId,
     productId,
+    variantKey: variantKey || "default",
   });
 
-  const { matchedCount } = result;
-
-  if (matchedCount === 0) {
+  if (!result) {
     res.status(STATUS_CODES.NOT_FOUND).json({
       code: STATUS_CODES.NOT_FOUND,
       status: "error",
