@@ -65,8 +65,15 @@ const orderSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],
-      default: "pending",
+      enum: [
+        "checkout",
+        "pending",
+        "confirmed",
+        "shipped",
+        "delivered",
+        "cancelled",
+      ],
+      default: "checkout",
     },
     shippingFee: {
       type: Number,

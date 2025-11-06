@@ -28,4 +28,10 @@ router.patch(
 
 router.patch("/:id/cancel", accessTokenMiddleware, orderController.cancelOrder);
 
+router.delete(
+  "/:id",
+  accessTokenMiddleware,
+  orderController.deleteOrderByStatusCheckout
+);
+
 export default router;

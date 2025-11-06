@@ -88,6 +88,23 @@ class OrderService {
       { new: true }
     ).lean();
   }
+
+  static async deleteOrderByStatusCheckout(id: string, userId: string) {
+    const order = await this.getById(id, userId);
+
+    if (!order) {
+      throw new NotFoundError("Đơn đặt không tồn tại!");
+    }
+
+    if (order.status !== "checkout") {
+      throw new NotFoundError("Chỉ được xóa đơn hàng ở trạng thái 'checkout'!");
+    }
+
+    return await Order.findOneAndDelete({
+      _id: id,
+      user: userId,
+    }).lean();
+  }
 }
 
 export default OrderService;

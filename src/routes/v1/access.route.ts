@@ -13,10 +13,11 @@ import { refreshTokenMiddleware } from "../../middlewares/refresh-token.middlewa
 const router = Router();
 
 // -------------------------------- ACCOUNT GET ROUTES ---------------------------//
-router.get("/", asyncHandler(accessController.getUserByEmail));
 // -------------------------------- END ACCOUNT GET ROUTES -----------------------//
 
 // -------------------------------- ACCOUNT POST ROUTES --------------------------//
+
+router.post("/", asyncHandler(accessController.getUserByEmail));
 
 // [POST] /access/logout
 router.post("/logout", accessTokenMiddleware, accessController.logout);

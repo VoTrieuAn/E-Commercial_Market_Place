@@ -92,3 +92,19 @@ export const cancelOrder = async (req: IAuthRequest, res: Response) => {
     data: removeKeysObject(result as object, ["__v"]),
   });
 };
+
+export const deleteOrderByStatusCheckout = async (
+  req: IAuthRequest,
+  res: Response
+) => {
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
+  const { id } = req.params;
+  const result = await OrderService.deleteOrderByStatusCheckout(id, userId);
+
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    message: "Hủy xem trước đơn đặt thành công",
+    data: removeKeysObject(result as object, ["__v"]),
+  });
+};
