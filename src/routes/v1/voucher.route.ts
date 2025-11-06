@@ -12,9 +12,13 @@ router.get("/", accessTokenMiddleware, voucherController.voucher);
 //   asyncHandler(getAllDiscountCodeWithProductsController)
 // );
 
-// routerDiscount.post("/amount", asyncHandler(getDiscountAmountController));
-
 router.get("/", accessTokenMiddleware, asyncHandler(voucherController.voucher));
+
+router.get(
+  "/user",
+  accessTokenMiddleware,
+  asyncHandler(voucherController.voucherByUser)
+);
 
 router.post(
   "/",

@@ -11,7 +11,7 @@ const schema = new Schema({
   startDate: { type: Date, required: true }, // ngày bắt đầu
   endDate: { type: Date, required: true }, // ngày kết thúc
   maxUses: { type: Number, required: true }, // số lượng discount được áp dụng
-  usesCount: { type: Number, require: true }, // số lần đã sử dụng
+  usesCount: { type: Number, require: true }, // số lần đã sử dụng của mã giảm giá cho từng user
   usersUsed: { type: Array, default: [] }, // danh sách user đã sử dụng
   maxUsesPerUser: { type: Number, required: true }, // số lần sử dụng tối đa cho mỗi user
   minOrderValue: { type: Number, require: true }, // giá trị đơn hàng tối thiểu để áp dụng mã giảm giá

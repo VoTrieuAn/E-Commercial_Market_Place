@@ -31,6 +31,7 @@ export const listOrders = async (req: IAuthRequest, res: Response) => {
     limit: limit ? Number(limit) : 20,
     page: page ? Number(page) : 1,
     modelName: "Order",
+    find: { user: userId },
   });
 
   const results = await OrderService.getOrderByUser(userId, {

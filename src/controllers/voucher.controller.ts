@@ -6,6 +6,7 @@ import {
 import VoucherService from "../services/voucher.service";
 import { STATUS_CODES } from "../utils/status-codes";
 import paginationHelper from "../helpers/pagination.helper";
+import { removeKeysObject } from "../utils/lodash.util";
 
 export const voucher = async (req: IAuthRequest, res: Response) => {
   const { page, limit } = req.query;
@@ -26,6 +27,29 @@ export const voucher = async (req: IAuthRequest, res: Response) => {
     metadata: results,
   });
 };
+
+export const voucherByUser = async (req: IAuthRequest, res: Response) => {
+  const { userId } = req.decodeUser as IDecodedTokenPayLoad;
+  const { page, limit } = req.query;
+
+  const skip = page && limit ? (Number(page) - 1) * Number(limit) : 0;
+
+  const results = await VoucherService.getAllVouchersByUser({
+    userId,
+    limit: limit ? Number(limit) : 10,
+    skip: skip,
+  });
+
+  res.status(STATUS_CODES.OK).json({
+    code: STATUS_CODES.OK,
+    status: "success",
+    message: "Lấy danh sách mã giảm giá của user thành công",
+    metadata: results.map((voucher) =>
+      removeKeysObject(voucher, ["__v", "usersUsed", "appliesTo", "__v"])
+    ),
+  });
+};
+
 export const voucherPost = async (req: IAuthRequest, res: Response) => {
   const result = await VoucherService.createVoucherCode({
     ...req.body,

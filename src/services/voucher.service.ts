@@ -150,8 +150,80 @@ class VoucherService {
       .sort(sort)
       .skip(skip)
       .limit(limit)
-      .select(["name", "code", "value", "type", "startDate", "endDate"])
+      .select([
+        "name",
+        "code",
+        "value",
+        "type",
+        "startDate",
+        "endDate",
+        "maxUsesPerUser",
+      ])
       .lean();
+  }
+
+  static async getAllVouchersByUser({
+    userId,
+    limit = 10,
+    skip = 0,
+  }: {
+    userId: string;
+    limit: number;
+    skip: number;
+  }) {
+    const now = new Date();
+    const foundVouchers = await Voucher.aggregate([
+      // 1. Lọc điều kiện chung (Hoạt động, còn hạn, còn lượt dùng chung)
+      {
+        $match: {
+          status: "active",
+          startDate: { $lte: now },
+          endDate: { $gte: now },
+          // So sánh giá trị hai trường: usesCount < maxUses
+          $expr: {
+            $lt: ["$usesCount", "$maxUses"],
+          },
+        },
+      },
+      // 2. Tính toán số lần user hiện tại đã sử dụng voucher này
+      // Sử dụng $filter và $size để đếm số lần ID của người dùng xuất hiện
+      {
+        $addFields: {
+          userUsageCount: {
+            $size: {
+              $filter: {
+                input: "$usersUsed",
+                as: "usageRecord",
+                // Điều kiện lọc: Kiểm tra ID người dùng
+                cond: { $eq: ["$$usageRecord.userId", userId] },
+              },
+            },
+          },
+          // Lấy ra số lần sử dụng tối đa của user đó
+          maxUsagePerUser: "$maxUsesPerUser",
+        },
+      },
+
+      // 3. Lọc điều kiện cá nhân (So sánh số lần đã dùng với giới hạn)
+      {
+        $match: {
+          // Trả về nếu userUsageCount < maxUsesPerUser
+          $expr: {
+            $lt: ["$userUsageCount", "$maxUsagePerUser"],
+          },
+        },
+      },
+
+      // 4. (Tùy chọn) Sắp xếp và làm sạch dữ liệu
+      { $sort: { minOrderValue: 1 } },
+      // Bỏ trường tạm thời ra khỏi kết quả cuối cùng
+      { $project: { userUsageCount: 0, maxUsagePerUser: 0 } },
+    ])
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    return foundVouchers;
   }
 
   static async getVoucherAmount({
@@ -191,11 +263,12 @@ class VoucherService {
     }
 
     if (maxUsesPerUser > 0) {
-      const userUsedDiscount = foundVoucher.usersUsed.filter(
+      const userUsedVoucher = foundVoucher.usersUsed.find(
         (user) => user.userId === userId
       );
-      if (userUsedDiscount) {
-        if (userUsedDiscount.length >= maxUsesPerUser) {
+
+      if (userUsedVoucher) {
+        if (userUsedVoucher.usesCount >= maxUsesPerUser) {
           throw new BadRequestError(
             "Bạn đã sử dụng mã giảm giá này vượt quá số lần cho phép!"
           );
