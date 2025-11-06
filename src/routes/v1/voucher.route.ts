@@ -22,4 +22,11 @@ router.post(
   asyncHandler(voucherController.voucherPost)
 );
 
+// [POST]
+router.post(
+  "/amount",
+  accessTokenMiddleware,
+  asyncHandler(voucherController.amountPost)
+);
+
 export default router;

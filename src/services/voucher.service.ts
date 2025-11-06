@@ -1,5 +1,5 @@
 import { BadRequestError, NotFoundError } from "../core/error.response";
-import { VoucherAppliesTo } from "../models/enum/voucher.enum";
+import { VoucherAppliesTo, VoucherType } from "../models/enum/voucher.enum";
 import Voucher from "../models/voucher.model";
 
 /**
@@ -55,7 +55,7 @@ class VoucherService {
       startDate: new Date(startDate),
       endDate: new Date(endDate),
       maxUses,
-      maxValue,
+      maxValue: VoucherType.PERCENTAGE ? maxValue : 0,
       usesCount: usesCount,
       usersUsed: usersUsed,
       maxUsesPerUser,
@@ -135,99 +135,87 @@ class VoucherService {
   //  * @param {shopId, limit, page}
   //  * @returns discountCodes
   //  */
-  // static async getAllDiscountCodeByShop({
-  //   limit,
-  //   page,
-  //   shopId,
-  // }: {
-  //   limit: number;
-  //   page: number;
-  //   shopId: string;
-  // }) {
-  //   return await findAllDiscountCodeUnSelect({
-  //     limit,
-  //     page,
-  //     filter: {
-  //       shop_id: convertToObjectId(shopId),
-  //       is_active: true,
-  //     },
-  //     select: ["name", "code", "value", "type", "start_date", "end_date"],
-  //   });
-  // }
+  static async getAllVouchers({
+    find = { status: "active" },
+    limit = 10,
+    skip = 0,
+    sort = "ctime",
+  }: {
+    find?: Record<string, any>;
+    limit: number;
+    skip: number;
+    sort?: string;
+  }) {
+    return await Voucher.find(find)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .select(["name", "code", "value", "type", "startDate", "endDate"])
+      .lean();
+  }
 
-  // static async getDiscountAmount({
-  //   code,
-  //   userId,
-  //   shopId,
-  //   products,
-  // }: {
-  //   code: string;
-  //   userId: string;
-  //   shopId: string;
-  //   products: any[];
-  // }) {
-  //   const foundDiscount = await checkDiscountExists({
-  //     code,
-  //     shop_id: convertToObjectId(shopId),
-  //   });
+  static async getVoucherAmount({
+    code,
+    userId,
+    totalOrder,
+  }: {
+    code: string;
+    userId: string;
+    totalOrder: number;
+  }) {
+    const foundVoucher = await Voucher.findOne({
+      code,
+    });
 
-  //   if (!foundDiscount) {
-  //     throw new NotFoundError("Discount code not exists!");
-  //   }
+    if (!foundVoucher) {
+      throw new NotFoundError("Mã giảm giá không tồn tại!");
+    }
 
-  //   const {
-  //     is_active,
-  //     max_uses,
-  //     min_order_value,
-  //     max_uses_per_user,
-  //     type,
-  //     value,
-  //   } = foundDiscount;
+    const { status, maxUses, minOrderValue, maxUsesPerUser, type, value } =
+      foundVoucher;
 
-  //   if (!is_active) {
-  //     throw new BadRequestError("Discount expired!");
-  //   }
+    if (!status) {
+      throw new BadRequestError("Mã giảm giá không khả dụng!");
+    }
 
-  //   if (!max_uses) {
-  //     throw new BadRequestError("Discount code has been used up!");
-  //   }
+    if (!maxUses) {
+      throw new BadRequestError("Mã giảm giá đã hết lượt sử dụng!");
+    }
 
-  //   let totalOrder = 0;
+    if ((minOrderValue as number) > 0) {
+      if (totalOrder < (minOrderValue as number)) {
+        throw new BadRequestError(
+          `Đơn hàng tối thiểu để áp dụng mã giảm giá là ${minOrderValue}`
+        );
+      }
+    }
 
-  //   if ((min_order_value as number) > 0) {
-  //     totalOrder = products.reduce((acc, product) => {
-  //       return acc + product.price * product.quantity;
-  //     }, 0);
+    if (maxUsesPerUser > 0) {
+      const userUsedDiscount = foundVoucher.usersUsed.filter(
+        (user) => user.userId === userId
+      );
+      if (userUsedDiscount) {
+        if (userUsedDiscount.length >= maxUsesPerUser) {
+          throw new BadRequestError(
+            "Bạn đã sử dụng mã giảm giá này vượt quá số lần cho phép!"
+          );
+        }
+      }
+    }
 
-  //     if (totalOrder < (min_order_value as number)) {
-  //       throw new BadRequestError(
-  //         `Order must be at least ${min_order_value} to apply this discount code!`
-  //       );
-  //     }
-  //   }
+    // Check xem discount này là fixed_amount hay percentage
 
-  //   if (max_uses_per_user > 0) {
-  //     const userUsedDiscount = foundDiscount.users_used.find(
-  //       (user) => user.userId === userId
-  //     );
-  //     if (userUsedDiscount) {
-  //       // ...
-  //     }
-  //   }
+    const amount =
+      type === VoucherType.FIXED_AMOUNT ? value : totalOrder * (value / 100);
 
-  //   // Check xem discount này là fixed_amount hay percentage
-
-  //   const amount =
-  //     type === DiscountType.FIXED_AMOUNT ? value : totalOrder * (value / 100);
-
-  //   return {
-  //     totalOrder,
-  //     // Số tiền được giảm
-  //     discount: amount,
-  //     // Tổng tiền còn lại phải trả
-  //     totalPrice: totalOrder - amount,
-  //   };
-  // }
+    return {
+      totalOrder,
+      // Số tiền được giảm
+      discount: amount,
+      // Tổng tiền còn lại phải trả
+      totalPrice: totalOrder - amount,
+    };
+  }
 
   // static async deleteDiscountCode({
   //   code,
