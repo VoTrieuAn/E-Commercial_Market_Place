@@ -73,7 +73,7 @@ const orderSchema = new Schema(
         "delivered",
         "cancelled",
       ],
-      default: "checkout",
+      default: "confirmed",
     },
     shippingFee: {
       type: Number,

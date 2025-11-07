@@ -44,9 +44,15 @@ export const voucherByUser = async (req: IAuthRequest, res: Response) => {
     code: STATUS_CODES.OK,
     status: "success",
     message: "Lấy danh sách mã giảm giá của user thành công",
-    metadata: results.map((voucher) =>
-      removeKeysObject(voucher, ["__v", "usersUsed", "appliesTo", "__v"])
-    ),
+    metadata: results.map((voucher) => {
+      const countUserUsed = voucher.usersUsed.filter(
+        (user: any) => user.userId.toString() === userId
+      ).length;
+      return {
+        ...removeKeysObject(voucher, ["__v", "usersUsed", "appliesTo", "__v"]),
+        countUserUsed,
+      };
+    }),
   });
 };
 

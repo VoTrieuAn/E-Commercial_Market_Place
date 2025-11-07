@@ -7,16 +7,13 @@ import AttributeProductService from "../services/attribute-product.service";
 import paginationHelper from "../helpers/pagination.helper";
 import { removeKeysObject } from "../utils/lodash.util";
 import { cleanAndGroupProductVariants } from "../helpers/other.helper";
+import Feedback from "../models/feedback.model";
 
 // [GET] /products/
 export const product = async (req: Request, res: Response) => {
-  const { limit, page, keyword } = req.query;
+  const { limit, page, keyword, minp, maxp, rate } = req.query;
 
-  const find: {
-    deleted: boolean;
-    status: string;
-    search?: RegExp;
-  } = {
+  const find: any = {
     deleted: false,
     status: "active",
   };
@@ -30,11 +27,42 @@ export const product = async (req: Request, res: Response) => {
     find.search = keywordRegex;
   }
 
+  const min = parseInt(minp as string);
+  const max = parseInt(maxp as string);
+
+  if (!isNaN(min) && !isNaN(max)) {
+    find.priceNew = { $gte: min, $lte: max };
+  } else if (!isNaN(min)) {
+    find.priceNew = { $gte: min };
+  } else if (!isNaN(max)) {
+    find.priceNew = { $lte: max };
+  }
+
+  if (rate) {
+    const rateVal = parseInt(rate as string);
+    if (!isNaN(rateVal)) {
+      const rateVal = Math.floor(Number(rate));
+      if (!isNaN(rateVal)) {
+        // aggregate feedbacks: group by productId, compute avg -> floor -> filter >= rateVal
+        const matched = await Feedback.aggregate([
+          { $match: { productId: { $exists: true }, deleted: { $ne: true } } },
+          { $group: { _id: "$productId", avgRating: { $avg: "$rating" } } },
+          { $addFields: { avgFloor: { $floor: "$avgRating" } } },
+          { $match: { avgFloor: { $gte: rateVal } } },
+          { $project: { _id: 1 } },
+        ]);
+
+        const productIds = matched.map((m: any) => m._id).filter(Boolean);
+        find._id = productIds.length ? { $in: productIds } : { $in: [] };
+      }
+    }
+  }
+
   const pagination = await paginationHelper({
     modelName: "Product",
-    find: { deleted: false },
-    limit: limit ? Number(limit) : 20,
-    page: page ? Number(page) : 1,
+    find,
+    limit: limit ? parseInt(limit as string) : 20,
+    page: page ? parseInt(page as string) : 1,
   });
 
   const records = await ProductService.getAll({

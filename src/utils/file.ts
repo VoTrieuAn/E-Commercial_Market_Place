@@ -36,7 +36,6 @@ export const handleUploadImage = async (req: Request) => {
   });
 
   return new Promise<File[]>((resolve, reject) => {
-    console.log("Chạy vào đây");
     form.parse(req, (err, fields, files) => {
       if (err) {
         return reject(err);

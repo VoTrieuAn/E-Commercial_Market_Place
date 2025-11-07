@@ -1,5 +1,6 @@
 import { NotFoundError } from "../core/error.response";
 import Order from "../models/order.model";
+import CartService from "./cart.service";
 
 import UserAddressService from "./user-address.service";
 
@@ -12,6 +13,16 @@ class OrderService {
     }
 
     const { _id } = shippingAddress;
+
+    const productIds = data.items.map((item: any) => item.productId);
+    if (productIds.length) {
+      for (const productId of productIds) {
+        const itemInCart = await CartService.deleteProductInCart({
+          userId,
+          productId,
+        });
+      }
+    }
 
     return await Order.create({
       user: userId,
