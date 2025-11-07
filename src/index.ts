@@ -5,9 +5,12 @@ import { connectDB } from "./configs/database.config";
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import defaultErrorRequestHandler from "./middlewares/error-handler.helper";
+import { initFolder } from "./utils/file";
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+initFolder();
 
 connectDB();
 
