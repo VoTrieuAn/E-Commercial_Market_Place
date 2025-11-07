@@ -11,4 +11,10 @@ router.post(
   asyncHandler(mediaController.uploadImage)
 );
 
+router.post(
+  "/upload-video",
+  accessTokenMiddleware,
+  asyncHandler(mediaController.uploadVideo)
+);
+
 export default router;

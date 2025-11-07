@@ -1,6 +1,10 @@
 import { Request } from "express";
 import { UPLOAD_IMAGE_DIR } from "../commons/dir";
-import { getNameFormFullName, handleUploadImage } from "../utils/file";
+import {
+  getNameFormFullName,
+  handleUploadImage,
+  handleUploadVideo,
+} from "../utils/file";
 import { Media } from "../models/interfaces/media.interface";
 import path from "path";
 import sharp from "sharp";
@@ -8,6 +12,7 @@ import { uploadFileToS3 } from "../utils/s3";
 import mime from "mime";
 import fsPromises from "fs/promises";
 import { MediaType } from "../models/enum/media.enum";
+import { CompleteMultipartUploadCommandOutput } from "@aws-sdk/client-s3";
 
 class MediaService {
   static async uploadImage(req: Request) {
@@ -41,6 +46,29 @@ class MediaService {
         return {
           url: s3Result.Location as string, // Trả về đường dẫn ảnh đã up load lên S3
           type: MediaType.Image,
+        };
+      })
+    );
+
+    return result;
+  }
+
+  static async uploadVideo(req: Request) {
+    const files = await handleUploadVideo(req);
+
+    const result = await Promise.all(
+      files.map(async (file) => {
+        const s3Result = await uploadFileToS3({
+          filename: "videos/" + file.newFilename,
+          contentType: mime.getType(file.filepath) as string,
+          filepath: file.filepath,
+        });
+        fsPromises.unlink(file.filepath);
+
+        return {
+          url: (s3Result as CompleteMultipartUploadCommandOutput)
+            .Location as string,
+          type: MediaType.Video,
         };
       })
     );

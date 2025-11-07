@@ -42,8 +42,6 @@ export const handleUploadImage = async (req: Request) => {
         return reject(err);
       }
 
-      console.log(files);
-
       if (!files.image) {
         return reject(new Error("File is empty"));
       }

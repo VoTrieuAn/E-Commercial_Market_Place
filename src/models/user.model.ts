@@ -24,10 +24,10 @@ const userSchema = new Schema(
     },
     // emailVerifyToken: String,
     // forGotPasswordToken: String,
-    // avatar: {
-    //   type: String,
-    //   default: "",
-    // },
+    avatar: {
+      type: String,
+      default: "",
+    },
     status: {
       type: String,
       enum: ["active", "inactive"],

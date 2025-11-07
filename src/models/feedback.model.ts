@@ -6,7 +6,6 @@ const schema = new Schema(
     orderId: { type: Schema.Types.ObjectId, ref: "Order" },
     productId: { type: Schema.Types.ObjectId, ref: "Product" },
     rating: { type: Number, required: true, min: 1, max: 5 },
-    // tags: { type: [String], default: [] },
     emotion: {
       type: String,
       enum: ["sad", "neutral", "happy"],
@@ -14,7 +13,7 @@ const schema = new Schema(
     },
     comment: { type: String, default: "" },
     images: { type: [String], default: [] },
-    deleted: { type: Boolean, default: false },
+    updated: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
