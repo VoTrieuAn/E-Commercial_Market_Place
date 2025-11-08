@@ -9,19 +9,18 @@ import paginationHelper from "../helpers/pagination.helper";
 import { removeKeysObject } from "../utils/lodash.util";
 
 export const feedbackByProduct = async (req: IAuthRequest, res: Response) => {
-  const { productId } = req.body;
-  const { page, limit } = req.query;
+  const { page, limit, proId } = req.query;
 
   const pagination = await paginationHelper({
     modelName: "Feedback",
-    find: { productId },
+    find: { productId: proId },
     limit: limit ? Number(limit) : 20,
     page: page ? Number(page) : 1,
   });
 
   const results = await FeedbackService.getFeedbackByProductId(
     {
-      productId,
+      productId: proId,
     },
     {
       skip: pagination.skip,
