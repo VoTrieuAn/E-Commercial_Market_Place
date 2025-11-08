@@ -8,8 +8,8 @@ import favoriteRouter from "./favorite.route";
 import orderRouter from "./order.route";
 import feedbackRouter from "./feedback.route";
 import mediaRouter from "./media.route";
-
 import voucherRouter from "./voucher.route";
+import otpRouter from "./otp.route";
 
 const router = Router();
 
@@ -32,5 +32,7 @@ router.use("/feedbacks", feedbackRouter);
 router.use("/medias", mediaRouter);
 
 router.use("/vouchers", voucherRouter);
+
+router.use("/otps", otpRouter);
 
 export default router;
