@@ -8,7 +8,7 @@ const keyTokenSchema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: "users-demo",
+      ref: "User",
     },
     publicKey: {
       type: String,

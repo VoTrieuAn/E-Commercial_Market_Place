@@ -26,6 +26,6 @@ schema.index({ createdAt: 1 }, { expireAfterSeconds: 300 });
 
 schema.index({ target: 1, purpose: 1 });
 
-const Otp = model("Otp", schema, "otps-demo");
+const Otp = model("Otp", schema, "otps");
 
 export default Otp;

@@ -6,6 +6,7 @@ const schema = new Schema(
     slug: String,
     category: {
       type: [String],
+      ref: "BlogCategory",
     },
     avatar: String,
     description: String,

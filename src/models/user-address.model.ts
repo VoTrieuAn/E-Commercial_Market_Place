@@ -33,10 +33,6 @@ const userAddressSchema = new Schema(
   }
 );
 
-const UserAddress = model(
-  "UserAddress",
-  userAddressSchema,
-  "users-address-demo"
-);
+const UserAddress = model("UserAddress", userAddressSchema, "users-address");
 
 export default UserAddress;

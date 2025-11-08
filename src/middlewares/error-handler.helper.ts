@@ -1,33 +1,51 @@
-import { Request, Response, NextFunction } from "express";
+import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
+import { ErrorResponse } from "../core/error.response";
+import { STATUS_CODES } from "../utils/status-codes";
+import { omit } from "lodash";
 
-function serializeError(err: any) {
-  const out: any = {
-    message: err?.message || "Internal Server Error",
-  };
-  if (err?.name) out.name = err.name;
-  if (err?.code) out.code = err.code;
-  if (process.env.NODE_ENV !== "production") {
-    out.stack = err?.stack;
-    if (err?.details) out.details = err.details;
-  }
-  return out;
-}
-
-export default function defaultErrorRequestHandler(
+const defaultErrorRequestHandler: ErrorRequestHandler = (
   err: any,
   req: Request,
   res: Response,
-  _next: NextFunction
-) {
-  // server log (full err for debugging). Do NOT return full err to client.
-  console.error("Unhandled error:", err);
+  next: NextFunction
+) => {
+  if (err instanceof ErrorResponse) {
+    res.status(err.getStatus()).json({
+      code: err.getStatus(),
+      status: "error",
+      ...omit(err, ["status"]),
+    });
+    return;
+  }
 
-  const status = err?.status || err?.statusCode || 500;
-  const body = {
-    code: status,
-    status: "error",
-    ...serializeError(err),
-  };
+  const finalError: any = {};
 
-  return res.status(status).json(body);
-}
+  Object.getOwnPropertyNames(err).forEach((key) => {
+    Object.getOwnPropertyDescriptor(err, key);
+    /**
+     * Object.getOwnPropertyDescriptor
+     * Lấy metadata (descriptor) của một property, gồm:
+     *    configurable → có thể thay đổi descriptor hoặc xóa property không
+     *    writable → có thể gán giá trị mới không
+     *    enumerable → có xuất hiện khi duyệt for...in hoặc JSON.stringify không
+     *    value → giá trị của property
+     */
+
+    if (
+      !Object.getOwnPropertyDescriptor(err, key)?.configurable ||
+      !Object.getOwnPropertyDescriptor(err, key)?.writable
+    ) {
+      return;
+    }
+    Object.defineProperty(err, key, { enumerable: true }); // enumerable để có thể hiển thị trong JSON
+    finalError[key] = err[key];
+  });
+
+  res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+    message: finalError.message,
+    errorInfo: omit(finalError, ["stack"]), // omit để loại bỏ stack trace khỏi response
+  });
+  return;
+};
+
+export default defaultErrorRequestHandler;

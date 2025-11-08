@@ -5,7 +5,10 @@ const schema = new Schema(
     name: String,
     slug: String,
     position: Number, // vị trí sắp xếp
-    category: [String],
+    category: {
+      type: [String],
+      ref: "CategoryProduct",
+    },
     images: [String],
     priceOld: Number,
     priceNew: Number,

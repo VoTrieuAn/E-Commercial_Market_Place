@@ -29,15 +29,14 @@ const cartSchema = new Schema(
     userId: {
       type: Schema.Types.ObjectId,
       require: true,
-      ref: "users-demo",
+      ref: "User",
     },
   },
   {
-    collection: "carts-demo",
     timestamps: true,
   }
 );
 
-const Cart = model("Cart", cartSchema, "carts-demo");
+const Cart = model("Cart", cartSchema, "carts");
 
 export default Cart;

@@ -18,6 +18,6 @@ const schema = new Schema(
   { timestamps: true }
 );
 
-const Feedback = model("Feedback", schema, "feedbacks-demo");
+const Feedback = model("Feedback", schema, "feedbacks");
 
 export default Feedback;

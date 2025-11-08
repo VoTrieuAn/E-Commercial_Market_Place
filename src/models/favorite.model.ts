@@ -16,6 +16,6 @@ const schemaFavorite = new Schema(
   }
 );
 
-const Favorite = model("Favorite", schemaFavorite, "favorites-demo");
+const Favorite = model("Favorite", schemaFavorite, "favorites");
 
 export default Favorite;

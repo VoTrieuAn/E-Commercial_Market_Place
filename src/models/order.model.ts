@@ -106,6 +106,6 @@ const orderSchema = new Schema(
   }
 );
 
-const Order = model("Order", orderSchema, "orders-demo");
+const Order = model("Order", orderSchema, "orders");
 
 export default Order;
